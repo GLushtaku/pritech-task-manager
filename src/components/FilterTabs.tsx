@@ -50,10 +50,12 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
+    maxHeight: 40,
   },
   scrollContent: {
     gap: SPACING.sm,
     paddingRight: SPACING.sm,
+    alignItems: 'center',
   },
   tab: {
     paddingHorizontal: SPACING.lg,
@@ -62,6 +64,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabActive: {
     backgroundColor: COLORS.primary,
@@ -69,12 +74,12 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.bold,
+    fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textLight,
   },
   tabTextActive: {
     color: COLORS.white,
-    fontWeight: FONT_WEIGHTS.bold,
+    fontWeight: FONT_WEIGHTS.semiBold,
   },
 });
 
