@@ -95,7 +95,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               style={[
                 styles.actionBtn,
                 { backgroundColor: isCompleted
-                    ? COLORS.warning + '15'
+                    ? COLORS.warning 
                     : COLORS.success + '15'
                 },
               ]}

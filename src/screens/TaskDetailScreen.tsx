@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTaskStore } from '../store/taskStore';
 import { RootStackParamList } from '../types';
 import {
@@ -22,13 +23,14 @@ import {
 import EmptyState from '../components/EmptyState';
 
 type DetailRouteProp = RouteProp<RootStackParamList, 'TaskDetail'>;
+type DetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 /**
  * Displays full details of a single task.
- * Allows toggling status and deleting the task.
+ * Allows editing, toggling status and deleting the task.
  */
 const TaskDetailScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<DetailNavigationProp>();
   const route = useRoute<DetailRouteProp>();
   const { taskId } = route.params;
 
@@ -109,23 +111,36 @@ const TaskDetailScreen: React.FC = () => {
         <Text style={styles.description}>{task.description}</Text>
       </View>
 
-      {/* Toggle button */}
-      <TouchableOpacity
-        style={[
-          styles.toggleButton,
-          {
-            backgroundColor: isCompleted ? COLORS.warning : COLORS.success,
-          },
-        ]}
-        onPress={() => toggleTask(taskId)}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.toggleButtonText}>
-          {isCompleted ? '↩  Mark as Active' : '✓  Mark as Completed'}
-        </Text>
-      </TouchableOpacity>
+      {/* Actions row — Edit + Toggle */}
+      <View style={styles.actionsRow}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.editButton]}
+          onPress={() => navigation.navigate('EditTask', { taskId })}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.editButtonText}>✏️  Edit</Text>
+        </TouchableOpacity>
 
-      {/* Delete button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            styles.toggleButton,
+            {
+              backgroundColor: isCompleted
+                ? COLORS.warning
+                : COLORS.success,
+            },
+          ]}
+          onPress={() => toggleTask(taskId)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.toggleButtonText}>
+            {isCompleted ? '↩  Active' : '✓  Complete'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Delete — separate, smaller */}
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={handleDelete}
@@ -185,28 +200,46 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     lineHeight: LINE_HEIGHTS.lg,
   },
-  toggleButton: {
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.md,
-    alignItems: 'center',
+  actionsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
     marginTop: SPACING.md,
+  },
+  actionButton: {
+    flex: 1,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
     ...SHADOWS.card,
+  },
+  editButton: {
+    backgroundColor: COLORS.primary,
+  },
+  editButtonText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.semiBold,
+  },
+  toggleButton: {
+    // backgroundColor vendoset inline dinamikisht
   },
   toggleButtonText: {
     color: COLORS.white,
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.semiBold,
   },
   deleteButton: {
     borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.danger,
+    borderColor: COLORS.danger + '60',
+    backgroundColor: COLORS.danger + '08',
   },
   deleteButtonText: {
     color: COLORS.danger,
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.sm,
     fontWeight: FONT_WEIGHTS.medium,
   },
 });

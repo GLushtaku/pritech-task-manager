@@ -97,6 +97,15 @@ const AppNavigator: React.FC = () => {
           }}
         />
         <Stack.Screen
+  name="EditTask"
+  component={AddTaskScreen}
+  options={{
+    title: 'Edit Task',
+    headerBackTitle: 'Back',
+    presentation: 'modal',
+  }}
+/>
+        <Stack.Screen
           name="TaskDetail"
           component={TaskDetailScreen}
           options={{

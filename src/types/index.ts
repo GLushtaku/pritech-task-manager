@@ -12,6 +12,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   AddTask: undefined;
   TaskDetail: { taskId: string };
+  EditTask: { taskId: string };
 };
 
 export type BottomTabParamList = {

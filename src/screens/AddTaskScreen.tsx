@@ -10,8 +10,9 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTaskStore } from '../store/taskStore';
+import { RootStackParamList } from '../types';
 import {
   COLORS,
   SPACING,
@@ -22,22 +23,32 @@ import {
   LINE_HEIGHTS,
 } from '../constants';
 
+type EditTaskRouteProp = RouteProp<RootStackParamList, 'EditTask'>;
+
 /**
- * Screen for creating a new task.
- * Includes input validation before saving.
+ * Reusable screen for creating and editing tasks.
+ * When accessed via 'EditTask' route, pre-fills fields
+ * with existing task data and updates instead of creating.
  */
 const AddTaskScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { addTask } = useTaskStore();
+  const route = useRoute<EditTaskRouteProp>();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const { addTask, editTask, getTaskById } = useTaskStore();
+
+  // Detect if we are in edit mode
+  const taskId = route.params?.taskId;
+  const isEditMode = !!taskId;
+  const existingTask = isEditMode ? getTaskById(taskId) : null;
+
+  const [title, setTitle] = useState(existingTask?.title ?? '');
+  const [description, setDescription] = useState(existingTask?.description ?? '');
   const [titleError, setTitleError] = useState('');
   const [descriptionError, setDescriptionError] = useState('');
 
   /**
-   * Validates inputs and saves the task.
-   * Shows inline errors if validation fails.
+   * Validates inputs then either creates a new task
+   * or updates the existing one depending on the mode.
    */
   const handleSave = () => {
     let isValid = true;
@@ -64,7 +75,12 @@ const AddTaskScreen: React.FC = () => {
 
     if (!isValid) return;
 
-    addTask(title, description);
+    if (isEditMode && taskId) {
+      editTask(taskId, title, description);
+    } else {
+      addTask(title, description);
+    }
+
     navigation.goBack();
   };
 
@@ -132,7 +148,9 @@ const AddTaskScreen: React.FC = () => {
           onPress={handleSave}
           activeOpacity={0.8}
         >
-          <Text style={styles.saveButtonText}>Save Task</Text>
+          <Text style={styles.saveButtonText}>
+            {isEditMode ? 'Save Changes' : 'Save Task'}
+          </Text>
         </TouchableOpacity>
 
         {/* Cancel button */}
