@@ -3,9 +3,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList, BottomTabParamList } from '../types';
 import { COLORS, FONT_SIZES, FONT_WEIGHTS, SPACING } from '../constants';
 
+// Screens
 import TaskListScreen from '../screens/TaskListScreen';
 import QuoteScreen from '../screens/QuoteScreen';
 import AddTaskScreen from '../screens/AddTaskScreen';
@@ -17,15 +19,25 @@ const Tab = createBottomTabNavigator<BottomTabParamList>();
 /**
  * Bottom tab navigator containing the two main sections:
  * Task List and the Quote (public API) screen.
+ * Uses safe area insets to handle Android and iOS bottom spacing correctly.
  */
 const MainTabs: React.FC = () => {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textLight,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: {
+          backgroundColor: COLORS.white,
+          borderTopColor: COLORS.border,
+          borderTopWidth: 1,
+          height: 56 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : SPACING.sm,
+          paddingTop: SPACING.xs,
+        },
         tabBarLabelStyle: styles.tabBarLabel,
       }}
     >
@@ -98,13 +110,6 @@ const AppNavigator: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: COLORS.white,
-    borderTopColor: COLORS.border,
-    paddingBottom: SPACING.sm,
-    paddingTop: SPACING.xs,
-    height: 60,
-  },
   tabBarLabel: {
     fontSize: FONT_SIZES.xs,
     fontWeight: FONT_WEIGHTS.medium,

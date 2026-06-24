@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   COLORS,
   SPACING,
@@ -16,109 +16,131 @@ import {
   SHADOWS,
   LINE_HEIGHTS,
 } from '../constants';
-
-interface Quote {
-  q: string;
-  a: string;
-}
+import useQuote from '../hooks/useQuote';
 
 /**
- * Fetches and displays a random motivational quote
- * from the ZenQuotes public API.
+ * Skeleton loader displayed while the quote is being fetched.
+ * Provides a better UX than a plain spinner.
+ */
+const SkeletonLoader: React.FC = () => (
+  <View style={skeletonStyles.container}>
+    <View style={skeletonStyles.line} />
+    <View style={[skeletonStyles.line, { width: '90%' }]} />
+    <View style={[skeletonStyles.line, { width: '75%' }]} />
+    <View style={skeletonStyles.divider} />
+    <View
+      style={[
+        skeletonStyles.line,
+        { width: '40%', alignSelf: 'flex-end' },
+      ]}
+    />
+  </View>
+);
+
+const skeletonStyles = StyleSheet.create({
+  container: {
+    gap: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  line: {
+    height: 16,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: COLORS.border,
+    width: '100%',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: SPACING.xs,
+  },
+});
+
+/**
+ * Displays a random motivational quote fetched via useQuote hook.
  * Satisfies the task requirement of using a public API.
  */
 const QuoteScreen: React.FC = () => {
-  const [quote, setQuote] = useState<Quote | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchQuote = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-
-      const response = await fetch('https://zenquotes.io/api/random');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch quote');
-      }
-
-      const data: Quote[] = await response.json();
-      setQuote(data[0]);
-    } catch (err) {
-      setError('Could not load quote. Please check your connection.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const { quote, isLoading, error, fetchQuote } = useQuote();
 
   useEffect(() => {
     fetchQuote();
   }, [fetchQuote]);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Daily Quote</Text>
-        <Text style={styles.headerSubtitle}>
-          Stay motivated and focused 💡
-        </Text>
+        <View>
+          <Text style={styles.headerTitle}>Daily Quote</Text>
+          <Text style={styles.headerSubtitle}>
+            Stay motivated and focused 💡
+          </Text>
+        </View>
       </View>
 
-      {/* Quote card */}
-      <View style={styles.card}>
-        {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color={COLORS.primary}
-            style={styles.loader}
-          />
-        ) : error ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorEmoji}>😕</Text>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : quote ? (
-          <View style={styles.quoteContainer}>
-            <Text style={styles.quoteIcon}>"</Text>
-            <Text style={styles.quoteText}>{quote.q}</Text>
-            <View style={styles.divider} />
-            <Text style={styles.quoteAuthor}>— {quote.a}</Text>
-          </View>
-        ) : null}
-      </View>
-
-      {/* Refresh button */}
-      <TouchableOpacity
-        style={styles.refreshButton}
-        onPress={fetchQuote}
-        activeOpacity={0.8}
-        disabled={isLoading}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
       >
-        <Text style={styles.refreshButtonText}>
-          {isLoading ? 'Loading...' : '🔄  New Quote'}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Quote card */}
+        <View style={styles.card}>
+          {isLoading ? (
+            <SkeletonLoader />
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorEmoji}>😕</Text>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : quote ? (
+            <View style={styles.quoteContainer}>
+              <Text style={styles.quoteIcon}>"</Text>
+              <Text style={styles.quoteText}>{quote.q}</Text>
+              <View style={styles.divider} />
+              <Text style={styles.quoteAuthor}>— {quote.a}</Text>
+            </View>
+          ) : null}
+        </View>
+
+        {/* Refresh button */}
+        <TouchableOpacity
+          style={[
+            styles.refreshButton,
+            isLoading && styles.refreshButtonDisabled,
+          ]}
+          onPress={fetchQuote}
+          activeOpacity={0.8}
+          disabled={isLoading}
+        >
+          <Text style={styles.refreshButtonText}>
+            {isLoading ? 'Loading...' : '🔄  New Quote'}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  container: {
+    flex: 1,
   },
   content: {
     padding: SPACING.lg,
     gap: SPACING.lg,
   },
   header: {
-    paddingTop: SPACING.xl,
-    gap: SPACING.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    backgroundColor: COLORS.white,
+    ...SHADOWS.card,
+    marginBottom: SPACING.md,
   },
   headerTitle: {
     fontSize: FONT_SIZES.xxl,
@@ -128,6 +150,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textLight,
+    marginTop: SPACING.xs,
   },
   card: {
     backgroundColor: COLORS.white,
@@ -136,9 +159,6 @@ const styles = StyleSheet.create({
     minHeight: 200,
     justifyContent: 'center',
     ...SHADOWS.strong,
-  },
-  loader: {
-    paddingVertical: SPACING.xl,
   },
   errorContainer: {
     alignItems: 'center',
@@ -185,6 +205,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     alignItems: 'center',
     ...SHADOWS.card,
+  },
+  refreshButtonDisabled: {
+    opacity: 0.6,
   },
   refreshButtonText: {
     color: COLORS.white,

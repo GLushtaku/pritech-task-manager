@@ -1,5 +1,9 @@
 export const STORAGE_KEY = '@pritech_tasks';
 
+export const API = {
+  quotesUrl: process.env.EXPO_PUBLIC_QUOTES_API_URL ?? 'https://dummyjson.com/quotes/random',
+} as const;
+
 export const FILTER_OPTIONS = [
   { label: 'All', value: 'all' },
   { label: 'Completed', value: 'completed' },
