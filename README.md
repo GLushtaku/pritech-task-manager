@@ -2,16 +2,6 @@
 
 A personal task manager mobile app built with React Native and Expo as part of the PRITECH LLC technical assessment.
 
----
-
-## Screenshots
-
-> Add screenshots here after running the app
-
----
-
-## Features
-
 ### Core Requirements
 - View all tasks in a clean list
 - Add new tasks with title and description
@@ -101,7 +91,7 @@ A `.env.example` file is included in the repository for reference.
 1. Clone the repository:
 
 ```
-git clone https://github.com/your-username/pritech-task-manager.git
+git clone https://github.com/GLushtaku/pritech-task-manager.git
 cd pritech-task-manager
 ```
 
